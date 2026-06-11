@@ -42,7 +42,7 @@ pip install -r requirements.txt
 **3. Get your RSS key (required for auto-download)**
 
 - Log into TorrentLeech -> My Account -> RSS (may have to enable it in settings)
-- Copy the key from the RSS feed URL
+- Copy the key from your profile
 
 **4. Create a `.env` file**
 
