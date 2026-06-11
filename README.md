@@ -54,7 +54,7 @@ RSS_KEY=your_rss_key_here
 **5. Run**
 
 ```bash
-python3 tl_freeleech_monitor.py
+python3 tracker.py
 ```
 
 ## Configuration
