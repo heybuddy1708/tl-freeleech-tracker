@@ -1,4 +1,4 @@
-# TorrentLeech Freeleech Monitor
+# TorrentLeech Freeleech Tracker
 
 A terminal-based tool that polls TorrentLeech for new freeleech torrents and optionally auto-downloads the `.torrent` files.
 
@@ -26,7 +26,7 @@ Core packages: `requests`, `python-dotenv`, `rich`. On Windows, also install `wi
 **1. Clone the repo and create a virtual environment**
 
 ```bash
-git clone https://github.com/heybuddy1708/torrentleech-freeleech-tracker.git
+git clone https://github.com/heybuddy1708/tl-freeleech-tracker.git
 cd freeleech_tracker
 python3 -m venv .venv
 source .venv/bin/activate
