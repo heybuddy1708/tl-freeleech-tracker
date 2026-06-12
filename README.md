@@ -85,7 +85,7 @@ All options are at the top of the script:
 | `DOWNLOAD_DIR` | `downloads` | Folder to save `.torrent` files |
 | `MIN_SIZE` | `None` | Minimum file size in bytes, e.g. `1 * 1024**3` for 1 GB |
 | `MAX_SIZE` | `None` | Maximum file size in bytes, e.g. `50 * 1024**3` for 50 GB |
-| `MINIMUM_FREE_SPACE` | `10 * 1024**3` | Minimum disk space to keep free (default 10 GB) |
+| `MIN_FREE_SPACE` | `10 * 1024**3` | Minimum disk space to keep free (default 10 GB) |
 | `EMAIL_NOTIFICATIONS` | `False` | Send an email when a new freeleech is found |
 
 ## qBittorrent integration

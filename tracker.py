@@ -66,7 +66,7 @@ def send_email(subject, body):
 
 def has_enough_space(size_bytes):
     free = shutil.disk_usage(DOWNLOAD_DIR).free
-    return free > size_bytes
+    return free - size_bytes > MIN_FREE_SPACE
 
 
 def load_seen():
