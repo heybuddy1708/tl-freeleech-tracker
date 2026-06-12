@@ -81,7 +81,7 @@ All options are at the top of the script:
 | Variable | Default | Description |
 |---|---|---|
 | `POLL_INTERVAL` | `60` | Seconds between checks |
-| `AUTO_DOWNLOAD` | `True` | Download `.torrent` files automatically |
+| `AUTO_DOWNLOAD` | `False` | Download `.torrent` files automatically |
 | `DOWNLOAD_DIR` | `downloads` | Folder to save `.torrent` files |
 | `MIN_SIZE` | `None` | Minimum file size in bytes, e.g. `1 * 1024**3` for 1 GB |
 | `MAX_SIZE` | `None` | Maximum file size in bytes, e.g. `50 * 1024**3` for 50 GB |

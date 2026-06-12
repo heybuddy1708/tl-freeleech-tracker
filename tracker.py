@@ -36,7 +36,7 @@ MIN_SIZE = None
 MAX_SIZE = None # Example: 5 * 1024**3 for 5 GB
 MIN_FREE_SPACE = 10 * 1024**3 # 10 GB
 AUTO_DOWNLOAD = False
-EMAIL_NOTIFICATIONS = True
+EMAIL_NOTIFICATIONS = False
 
 CATEGORY_MAP = {
     8: "Blu-ray", 9: "Blu-ray", 11: "Movies", 12: "Movies", 13: "Movies",
