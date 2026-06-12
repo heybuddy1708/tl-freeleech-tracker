@@ -7,7 +7,9 @@ A terminal-based tool that polls TorrentLeech for new freeleech torrents and opt
 - Live countdown display that updates in place — no terminal spam
 - Rich-formatted table showing category, size, seeders/leechers, and tags for each new release
 - Desktop notifications on macOS, Linux, and Windows
+- Email notifications for new freeleech releases
 - Auto-downloads `.torrent` files to a local folder
+- Skips downloads if there is not enough disk space
 - Optional min/max file size filter for downloads
 - Persists seen torrents across restarts so you never get spammed with old entries
 
@@ -44,14 +46,29 @@ pip install -r requirements.txt
 - Log into TorrentLeech -> My Account -> RSS (may have to enable it in settings)
 - Copy the key from your profile
 
-**4. Create a `.env` file**
+**4. Set up email notifications (optional)**
+
+- Enable 2-Step Verification on your Google account at https://myaccount.google.com/signinoptions/two-step-verification
+- Generate an app password at https://myaccount.google.com/apppasswords
+- Copy the 16-character password (no spaces)
+
+**5. Create a `.env` file**
+
+Copy `.env.example` and fill in your values:
+
+```bash
+cp .env.example .env
+```
 
 ```
 COOKIE=tluid=xxx; tlpass=xxx; lastbrowse=xxx; ...
 RSS_KEY=your_rss_key_here
+EMAIL_FROM=your_gmail_here@gmail.com
+EMAIL_TO=your_receiving_email_here@gmail.com
+EMAIL_PASSWORD=abcdabcdabcdabcd
 ```
 
-**5. Run**
+**6. Run**
 
 ```bash
 python3 tracker.py
@@ -68,6 +85,8 @@ All options are at the top of the script:
 | `DOWNLOAD_DIR` | `downloads` | Folder to save `.torrent` files |
 | `MIN_SIZE` | `None` | Minimum file size in bytes, e.g. `1 * 1024**3` for 1 GB |
 | `MAX_SIZE` | `None` | Maximum file size in bytes, e.g. `50 * 1024**3` for 50 GB |
+| `MINIMUM_FREE_SPACE` | `10 * 1024**3` | Minimum disk space to keep free (default 10 GB) |
+| `EMAIL_NOTIFICATIONS` | `False` | Send an email when a new freeleech is found |
 
 ## qBittorrent integration
 
