@@ -4,7 +4,10 @@ import os
 import sys
 import time
 import json
+import shutil
 import subprocess
+import smtplib
+from email.mime.text import MIMEText
 from datetime import datetime
 
 import requests
@@ -21,6 +24,9 @@ load_dotenv()
 
 COOKIE = os.getenv("COOKIE", "")
 RSS_KEY = os.getenv("RSS_KEY", "")
+EMAIL_FROM = os.getenv("EMAIL_FROM", "")
+EMAIL_TO = os.getenv("EMAIL_TO", "")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "")
 POLL_INTERVAL = 60 # Seconds between each poll
 SEEN_FILE = ".tl_seen_torrents"
 DOWNLOAD_DIR = "downloads"
@@ -28,7 +34,9 @@ API_URL = "https://www.torrentleech.org/torrents/browse/list/facets/tags%3AFREEL
 
 MIN_SIZE = None
 MAX_SIZE = None # Example: 5 * 1024**3 for 5 GB
-AUTO_DOWNLOAD = True
+MIN_FREE_SPACE = 10 * 1024**3 # 10 GB
+AUTO_DOWNLOAD = False
+EMAIL_NOTIFICATIONS = True
 
 CATEGORY_MAP = {
     8: "Blu-ray", 9: "Blu-ray", 11: "Movies", 12: "Movies", 13: "Movies",
@@ -42,6 +50,23 @@ CATEGORY_MAP = {
 }
 
 console = Console()
+
+def send_email(subject, body):
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = EMAIL_FROM
+    msg["To"] = EMAIL_TO
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login(EMAIL_FROM, EMAIL_PASSWORD)
+            smtp.send_message(msg)
+    except Exception as e:
+        console.print(f"[bold red]-  Email failed:[/bold red] {e}")
+
+
+def has_enough_space(size_bytes):
+    free = shutil.disk_usage(DOWNLOAD_DIR).free
+    return free > size_bytes
 
 
 def load_seen():
@@ -87,6 +112,11 @@ def within_size_limits(size):
 def download_torrent(t):
     if not RSS_KEY:
         console.print("[bold red]-  RSS_KEY not set — cannot download.[/bold red]")
+        return False
+    
+    size = t.get("size", 0)
+    if not has_enough_space(size):
+        console.print(f"[bold red]-  Not enough disk space for {t['name']}[/bold red]")
         return False
 
     fid = t["fid"]
@@ -240,6 +270,17 @@ def main():
             title="[yellow]Warning[/yellow]",
             border_style="yellow",
         ))
+    
+    if EMAIL_NOTIFICATIONS and not (EMAIL_FROM and EMAIL_TO and EMAIL_PASSWORD):
+        console.print(Panel(
+            "[bold yellow]EMAIL_NOTIFICATIONS is enabled but EMAIL values are not set.[/bold yellow]\n\n"
+            "Add to your [cyan].env[/cyan] file:\n\n"
+            "[bold yellow]EMAIL_FROM=your_sending_email_here[/bold yellow]\n\n"
+            "[bold yellow]EMAIL_TO=your_receiving_email_here[/bold yellow]\n\n"
+            "[bold yellow]EMAIL_PASSWORD=your_password_here (16 chars app password, not login)[/bold yellow]\n\n",
+            title="[yellow]Warning[/yellow]",
+            border_style="yellow",
+        ))
 
     print_header()
 
@@ -275,6 +316,12 @@ def main():
                         for t in new:
                             seen.add(str(t["fid"]))
                             notify("TL Freeleech", t["name"])
+
+                            if EMAIL_NOTIFICATIONS:
+                                send_email(
+                                    f"New Freeleech: {t['name']}",
+                                    f"Size: {fmt_size(t['size'])}\nhttps://www.torrentleech.org/torrent/{t['fid']}"
+                                )
                         print("\a")
 
                 save_seen(seen)
