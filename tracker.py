@@ -27,14 +27,14 @@ RSS_KEY = os.getenv("RSS_KEY", "")
 EMAIL_FROM = os.getenv("EMAIL_FROM", "")
 EMAIL_TO = os.getenv("EMAIL_TO", "")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "")
-POLL_INTERVAL = 60 # Seconds between each poll
+POLL_INTERVAL = 60
 SEEN_FILE = ".tl_seen_torrents"
 DOWNLOAD_DIR = "downloads"
 API_URL = "https://www.torrentleech.org/torrents/browse/list/facets/tags%3AFREELEECH"
 
 MIN_SIZE = None
-MAX_SIZE = None # Example: 5 * 1024**3 for 5 GB
-MIN_FREE_SPACE = 10 * 1024**3 # 10 GB
+MAX_SIZE = None
+MIN_FREE_SPACE = 10 * 1024**3
 AUTO_DOWNLOAD = False
 EMAIL_NOTIFICATIONS = False
 
@@ -50,6 +50,7 @@ CATEGORY_MAP = {
 }
 
 console = Console()
+
 
 def send_email(subject, body):
     msg = MIMEText(body)
@@ -113,7 +114,7 @@ def download_torrent(t):
     if not RSS_KEY:
         console.print("[bold red]-  RSS_KEY not set — cannot download.[/bold red]")
         return False
-    
+
     size = t.get("size", 0)
     if not has_enough_space(size):
         console.print(f"[bold red]-  Not enough disk space for {t['name']}[/bold red]")
@@ -197,6 +198,8 @@ def build_table(torrents):
     table.add_column("DL", style="bold", no_wrap=True, width=4)
     table.add_column("Name", style="bold white", ratio=1)
 
+    downloaded_torrents = []
+
     for t in torrents:
         cat = CATEGORY_MAP.get(t.get("categoryID", 0),
                                f"Cat {t.get('categoryID', '?')}")
@@ -206,6 +209,8 @@ def build_table(torrents):
 
         if AUTO_DOWNLOAD and within_size_limits(size):
             downloaded = download_torrent(t)
+            if downloaded:
+                downloaded_torrents.append(t)
 
         dl_icon = "[green]✓[/green]" if downloaded else "[dim]—[/dim]"
 
@@ -218,7 +223,7 @@ def build_table(torrents):
             dl_icon,
             t.get("name", "Unknown"),
         )
-    return table
+    return table, downloaded_torrents
 
 
 def countdown_panel(remaining, last_checked):
@@ -235,14 +240,10 @@ def countdown_panel(remaining, last_checked):
 
 
 def print_header():
-    dl_info = "on" if AUTO_DOWNLOAD else "off"
     console.print()
     console.print(Panel.fit(
         "[bold green] TorrentLeech Freeleech Monitor[/bold green]",
-        subtitle=Text(
-            f"Created by heybuddy1708",
-            style="dim",
-        ),
+        subtitle=Text("Created by heybuddy1708", style="dim"),
         border_style="green",
         padding=(0, 2),
     ))
@@ -270,7 +271,7 @@ def main():
             title="[yellow]Warning[/yellow]",
             border_style="yellow",
         ))
-    
+
     if EMAIL_NOTIFICATIONS and not (EMAIL_FROM and EMAIL_TO and EMAIL_PASSWORD):
         console.print(Panel(
             "[bold yellow]EMAIL_NOTIFICATIONS is enabled but EMAIL values are not set.[/bold yellow]\n\n"
@@ -312,15 +313,18 @@ def main():
                 else:
                     if new:
                         live.console.print(Rule("[bold green]New Freeleech[/bold green]", style="green"))
-                        live.console.print(build_table(new))
+                        table, downloaded = build_table(new)
+                        live.console.print(table)
                         for t in new:
                             seen.add(str(t["fid"]))
                             notify("TL Freeleech", t["name"])
 
-                            if EMAIL_NOTIFICATIONS:
+                        if EMAIL_NOTIFICATIONS:
+                            for t in downloaded:
                                 send_email(
-                                    f"New Freeleech: {t['name']}",
-                                    f"Size: {fmt_size(t['size'])}\nhttps://www.torrentleech.org/torrent/{t['fid']}"
+                                    f"Downloaded Freeleech: {t['name']}",
+                                    f"Size: {fmt_size(t['size'])}\n"
+                                    f"https://www.torrentleech.org/torrent/{t['fid']}"
                                 )
                         print("\a")
 
